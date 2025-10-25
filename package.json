@@ -1,0 +1,93 @@
+{
+	"name": "chatbot.js",
+	"version": "0.0.1",
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"description": "",
+	"type": "module",
+	"scripts": {
+		"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+		"build:clean": "rimraf dist",
+		"build:init": "copyfiles -u 1 src/sample.html dist && copyfiles -u 3 node_modules/katex/dist/katex.min.css node_modules/katex/dist/fonts/* dist",
+		"build:rollup": "rollup src/bundle.js --file dist/chatbot.js --format es --plugin @rollup/plugin-node-resolve --intro \"/* chatbot.js */(function(window, document){\" --footer \"}(window, document));\"",
+		"build:babel": "babel dist/chatbot.js --out-file dist/chatbot.compat.js --plugins @babel/plugin-transform-runtime",
+		"build:compatminify": "terser dist/chatbot.compat.js --output dist/chatbot.compat.min.js --banner \"/* chatbot.js */\"",
+		"build:minify": "google-closure-compiler --js dist/chatbot.js --js_output_file dist/chatbot.min.js --compilation_level SIMPLE --warning_level QUIET --output_wrapper \"/* chatbot.js */%output%\"",
+		"build:fast": "npm run build:clean && npm run build:init && copyfiles -u 1 src/chatbot.css dist && npm run build:rollup && renamer --find .js --replace .compat.min.js dist/chatbot.js && renamer --find .css --replace .min.css dist/chatbot.css",
+		"build": "npm run build:clean && npm run build:init && cleancss -o dist/chatbot.min.css src/chatbot.css && npm run build:rollup && npm run build:babel && npm run build:compatminify && npm run build:minify"
+	},
+	"jest": {
+		"transform": {},
+		"testEnvironment": "jsdom",
+		"setupFilesAfterEnv": [
+			"jest-expect-message"
+		],
+		"reporters": [
+			"default",
+			[
+				"jest-junit",
+				{
+					"outputDirectory": "./test-results",
+					"outputName": "junit.xml"
+				}
+			]
+		]
+	},
+	"babel": {
+		"presets": [
+			[
+				"@babel/preset-env",
+				{
+					"targets": [
+						"defaults"
+					],
+					"modules": false,
+					"useBuiltIns": "entry",
+					"corejs": 3
+				}
+			]
+		],
+		"plugins": [
+			[
+				"@babel/plugin-transform-runtime",
+				{
+					"corejs": 3,
+					"helpers": false,
+					"regenerator": true,
+					"useESModules": false
+				}
+			]
+		]
+	},
+	"dependencies": {
+		"@mdit/plugin-katex": "^0.23.1",
+		"markdown-it": "^14.1.0"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.0.0",
+		"@babel/core": "^7.0.0",
+		"@babel/plugin-transform-runtime": "^7.27.4",
+		"@babel/preset-env": "^7.0.0",
+		"@rollup/plugin-babel": "^6.0.4",
+		"@rollup/plugin-node-resolve": "^16.0.1",
+		"@types/jest": "^30.0.0",
+		"@types/markdown-it": "^14.1.2",
+		"chokidar": "^4.0.3",
+		"clean-css": "^5.3.3",
+		"clean-css-cli": "^5.6.3",
+		"copyfiles": "^2.4.1",
+		"google-closure-compiler": "^20250619.0.0",
+		"jest": "^30.0.3",
+		"jest-environment-jsdom": "^30.0.0",
+		"jest-expect-message": "^1.1.3",
+		"jest-junit": "^16.0.0",
+		"jsdom": "^26.0.0",
+		"picomatch": "^4.0.2",
+		"renamer": "^5.0.2",
+		"rimraf": "^6.0.1",
+		"rollup": "^4.44.0",
+		"terser": "^5.43.1",
+		"update": "^0.7.4"
+	}
+}
